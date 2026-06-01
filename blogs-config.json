@@ -2,11 +2,11 @@
   "blogs": [
     {
       "id": 1,
-      "title": "Reflections on Running a Multi-Day SRE Bootcamp",
-      "excerpt": "Key takeaways from training 50+ enterprise engineers on chaotic engineering practices, incident responses, and automated failover runbooks.",
-      "date": "April 30, 2026",
-      "notionLink": "https://notion.so/YOUR-NOTION-LINK-HERE-1",
-      "slug": "blog-sre"
+      "title": "Building my 2nd AI Chat Bot for our Airbnb Unit in Taguig",
+      "excerpt": "In this blog post, I share my experience building a second AI chat bot for our Airbnb unit in Taguig. I discuss the tools and technologies I used, the challenges I faced, and the results of implementing the chat bot to enhance guest communication and satisfaction.",
+      "date": "May 22, 2026",
+      "notionLink": "https://app.notion.com/p/Building-my-2nd-AI-Chat-Bot-for-our-Airbnb-Unit-in-Taguig-3721ea8069cf80649f98d28a38b3d669?source=copy_link",
+      "slug": "blog-ai"
     },
     {
       "id": 2,
