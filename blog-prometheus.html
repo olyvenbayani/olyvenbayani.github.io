@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CB. | Optimizing Prometheus & Grafana</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="blog-single-page">
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">CB<span>.</span></a>
+            <nav class="nav-links">
+                <a href="index.html#about" class="nav-item">About</a>
+                <a href="index.html#expertise" class="nav-item">Expertise</a>
+                <a href="index.html#blogs" class="nav-item active">Blogs</a>
+                <a href="index.html#contact" class="nav-item">Contact</a>
+            </nav>
+            <a href="index.html#contact" class="btn-talk">Let's Talk</a>
+        </div>
+    </header>
+
+    <!-- Blog Content Container -->
+    <main class="blog-post-wrapper">
+        <div class="blog-post-container">
+            <a href="index.html#blogs" class="btn-back">← Back to Portfolio</a>
+            
+            <div class="post-header">
+                <span class="post-tag">Observability</span>
+                <span class="post-date">May 28, 2026</span>
+                <h1 class="post-title">Optimizing Prometheus &amp; Grafana for High-Cardinality Metrics</h1>
+            </div>
+
+            <div class="post-banner">
+                <!-- Default Simulated Header SVG -->
+                <svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="400" height="220" rx="12" fill="#131317"></rect>
+                    <path d="M 0,20 L 400,20 M 0,40 L 400,40 M 0,60 L 400,60 M 0,80 L 400,80 M 0,100 L 400,100 M 0,120 L 400,120 M 0,140 L 400,140 M 0,160 L 400,160 M 0,180 L 400,180 M 0,200 L 400,200" stroke="#1f1f29" stroke-width="1"></path>
+                    <path d="M 40,0 L 40,220 M 80,0 L 80,220 M 120,0 L 120,220 M 160,0 L 160,220 M 200,0 L 200,220 M 240,0 L 240,220 M 280,0 L 280,220 M 320,0 L 320,220 M 360,0 L 360,220" stroke="#1f1f29" stroke-width="1"></path>
+                    <circle cx="200" cy="110" r="50" fill="none" stroke="#7c3aed" stroke-width="2" stroke-opacity="0.3"></circle>
+                    <circle cx="200" cy="110" r="30" fill="none" stroke="#a3e635" stroke-width="1.5" stroke-opacity="0.5"></circle>
+                    <text x="200" y="115" fill="#e4e4e7" font-size="12" font-weight="700" text-anchor="middle" font-family="Plus Jakarta Sans">SRE OBSERVABILITY</text>
+                </svg>
+            </div>
+
+            <article class="post-content">
+                <p>Observability is a cornerstone of modern Site Reliability Engineering. However, as microservices scale, the volume of metrics generated can grow exponentially. This often leads to the challenge of <strong>high cardinality</strong>—where metrics contain labels with a large set of possible values (like user IDs, IP addresses, or UUIDs). This deep dive details how we slashed our Prometheus TSDB memory consumption by 40% and reduced storage billing, while preserving crucial dashboard telemetry.</p>
+
+                <h2>Understanding the High Cardinality Storm</h2>
+                <p>Prometheus handles timeseries indexes using label combinations. Every unique combination of key-value pairs creates a new timeseries. When developers mistakenly add highly dynamic values as metrics labels, such as:</p>
+                <pre><code>http_requests_total{method="GET", user_id="8f9a2c3b-5d6e-7f8a..."}</code></pre>
+                <p>Prometheus has to index millions of streams, which causes its indexing memory to skyrocket and eventually crash with OOM (Out Of Memory) errors. In our multi-tenant Kubernetes cluster, this was causing weekly incidents.</p>
+
+                <h2>Step 1: Auditing Timeseries Cardinality</h2>
+                <p>We began by executing Prometheus API queries to locate the heaviest metrics in the cluster index. We ran the following query via Prometheus Web Console to find the top 10 metrics taking up the most index space:</p>
+                <pre><code>topk(10, count by (__name__) ({__name__=~".+"}))</code></pre>
+                <p>This quickly isolated a few custom application metrics that were exposing unique user session tokens in the labels. These metrics accounted for over 72% of our total timeseries count.</p>
+
+                <h2>Step 2: Implementing Metric Relabeling Configurations</h2>
+                <p>Instead of waiting for development teams to rewrite their application code, we resolved this immediately at the scraping layer. We configured <code>metric_relabel_configs</code> in our Prometheus agent configuration to drop or replace high-cardinality labels before they hit the database:</p>
+                <pre><code>metric_relabel_configs:
+  - source_labels: [user_id]
+    regex: ".+"
+    target_label: user_id
+    replacement: "anonymous"</code></pre>
+                <p>This configuration intercept took any unique <code>user_id</code> value and replaced it with the static string <code>"anonymous"</code>, consolidating millions of individual streams back into a single timeseries stream while keeping total call rate statistics intact.</p>
+
+                <h2>Step 3: Alerting on Cardinality Spikes</h2>
+                <p>To prevent future occurrences, we set up proactive alerts. We created a Prometheus alerting rule that triggers if the total index size or ingestion rate spikes unexpectedly:</p>
+                <pre><code>groups:
+- name: cardinality_alerts
+  rules:
+  - alert: PrometheusTimeseriesCountSpike
+    expr: prometheus_tsdb_head_series > 1500000
+    for: 15m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Prometheus timeseries count exceeded limits"</code></pre>
+
+                <h2>The Result</h2>
+                <p>After applying the configurations, the results were dramatic:</p>
+                <ul>
+                    <li><strong>Memory Usage:</strong> Dropped by 40% immediately, restoring stability to the monitoring pods.</li>
+                    <li><strong>Disk Space &amp; Retention:</strong> Disk storage growth slowed, saving substantial monthly EBS volumes costs.</li>
+                    <li><strong>Query Performance:</strong> Dashboard loading speed in Grafana went from 8.2 seconds down to less than 400 milliseconds.</li>
+                </ul>
+                <p>High cardinality is a common hurdle, but with structured index auditing, proactive relabeling policies, and strict developer guidelines on label schemas, you can keep your observability robust and cost-efficient.</p>
+            </article>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p class="copyright">© 2026 Carlo Bayani. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.html#about">About</a>
+                <a href="index.html#expertise">Expertise</a>
+                <a href="index.html#blogs">Blogs</a>
+                <a href="index.html#contact">Contact</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

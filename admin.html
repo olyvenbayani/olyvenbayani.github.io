@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CB. Portfolio Builder | Admin</title>
+    <!-- Marked Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-sidebar: #0f0f12;
+            --bg-editor: #080809;
+            --border-editor: #222226;
+            --text-editor: #e4e4e7;
+            --text-muted: #71717a;
+            --accent-purple: #7c3aed;
+            --accent-lime: #a3e635;
+            --accent-lime-glow: rgba(163, 230, 53, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-editor);
+            color: var(--text-editor);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 320px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-editor);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            flex-shrink: 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-editor);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .sidebar-header h1 span {
+            color: var(--accent-lime);
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-section h2 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        /* Drag and Drop list */
+        .section-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .section-item {
+            background-color: #18181c;
+            border: 1px solid var(--border-editor);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: grab;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+        }
+
+        .section-item:active {
+            cursor: grabbing;
+        }
+
+        .section-item.dragging {
+            opacity: 0.5;
+            background-color: var(--accent-purple);
+        }
+
+        .drag-handle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            user-select: none;
+        }
+
+        .section-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-meta input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: var(--accent-lime);
+        }
+
+        /* Image Upload Box */
+        .upload-zone {
+            border: 2px dashed var(--border-editor);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent-lime);
+            background-color: rgba(163, 230, 53, 0.02);
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .preview-avatar-mini {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0.5rem auto;
+            border: 1px solid var(--border-editor);
+            display: none;
+        }
+
+        /* Actions */
+        .actions-container {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-editor);
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-save {
+            background-color: var(--accent-lime);
+            color: #000000;
+        }
+
+        .btn-save:hover {
+            box-shadow: 0 4px 15px var(--accent-lime-glow);
+            filter: brightness(1.1);
+        }
+
+        .btn-preview-mode {
+            background-color: #1c1c22;
+            color: var(--text-editor);
+            border: 1px solid var(--border-editor);
+        }
+
+        .btn-preview-mode:hover {
+            background-color: #27272a;
+        }
+
+        /* Preview Canvas */
+        .canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background-color: var(--bg-editor);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-header {
+            height: 50px;
+            border-bottom: 1px solid var(--border-editor);
+            background-color: var(--bg-sidebar);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .canvas-workspace {
+            flex-grow: 1;
+            position: relative;
+            padding: 0;
+            background-color: var(--bg-editor);
+        }
+
+        #preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Alert Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #18181b;
+            border: 1px solid var(--accent-lime);
+            color: var(--text-editor);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: translateY(150%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar controls -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>CB. Portfolio<span>Builder</span></h1>
+            <p>Visual client-side static builder</p>
+        </div>
+
+        <!-- Section Order drag/drop list -->
+        <div class="sidebar-section">
+            <h2>Reorder Sections</h2>
+            <ul class="section-list" id="section-list">
+                <li class="section-item" draggable="true" data-section-id="hero">
+                    <span class="drag-handle">☰</span>
+                    <span>Hero Section</span>
+                    <div class="section-meta">
+                        <input type="checkbox" checked data-section-toggle="hero">
+                    </div>
+                </li>
+                <li class="section-item" draggable="true" data-section-id="expertise">
+                    <span class="drag-handle">☰</span>
+                    <span>Expertise Grid</span>
+                    <div class="section-meta">
+                        <input type="checkbox" checked data-section-toggle="expertise">
+                    </div>
+                </li>
+                <li class="section-item" draggable="true" data-section-id="blogs">
+                    <span class="drag-handle">☰</span>
+                    <span>Blogs &amp; Insights</span>
+                    <div class="section-meta">
+                        <input type="checkbox" checked data-section-toggle="blogs">
+                    </div>
+                </li>
+                <li class="section-item" draggable="true" data-section-id="about">
+                    <span class="drag-handle">☰</span>
+                    <span>About Me & Stats</span>
+                    <div class="section-meta">
+                        <input type="checkbox" checked data-section-toggle="about">
+                    </div>
+                </li>
+                <li class="section-item" draggable="true" data-section-id="contact">
+                    <span class="drag-handle">☰</span>
+                    <span>Contact Box</span>
+                    <div class="section-meta">
+                        <input type="checkbox" checked data-section-toggle="contact">
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Image Uploader -->
+        <div class="sidebar-section">
+            <h2>About Profile Photo</h2>
+            <div class="upload-zone" id="upload-zone">
+                <p>Click to Upload Avatar Photo</p>
+                <img id="avatar-preview-mini" class="preview-avatar-mini" alt="Preview">
+                <input type="file" id="avatar-file-input" accept="image/*">
+            </div>
+        </div>
+
+        <!-- Blog Actions -->
+        <div class="sidebar-section">
+            <h2>Blog Actions</h2>
+             <button class="btn-action btn-preview-mode" id="btn-create-blog"
+                style="background-color: rgba(163, 230, 53, 0.05); border: 1px solid var(--accent-lime); color: var(--accent-lime); font-weight: 700;">
+                Create New Blog Card +
+            </button>
+            <button class="btn-action btn-preview-mode" id="btn-import-markdown"
+                style="margin-top: 0.75rem; background-color: rgba(6, 182, 212, 0.05); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); font-weight: 700;">
+                Import Markdown (.md) 📝
+            </button>
+            <input type="file" id="markdown-file-input" accept=".md,text/markdown" style="display: none;">
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-container">
+            <button class="btn-action btn-save" id="btn-export-download">
+                Download index.html 📥
+            </button>
+            <button class="btn-action btn-preview-mode" id="btn-preview-toggle">
+                Toggle Guides Mode
+            </button>
+        </div>
+    </aside>
+
+    <!-- Canvas Area -->
+    <main class="canvas-container">
+        <div class="canvas-header">
+            <span>Visual Workspace (Click any text on screen to edit)</span>
+            <span>Portfolio Preview</span>
+        </div>
+        <div class="canvas-workspace" id="canvas-workspace">
+            <iframe id="preview-iframe" src="index.html"></iframe>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span>✓</span> <span id="toast-message">Site exported successfully!</span>
+    </div>
+
+    <!-- Page Builder JavaScript logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const iframe = document.getElementById('preview-iframe');
+            const sectionList = document.getElementById('section-list');
+            const exportDownloadBtn = document.getElementById('btn-export-download');
+            const previewToggleBtn = document.getElementById('btn-preview-toggle');
+            const createBlogBtn = document.getElementById('btn-create-blog');
+            const importMarkdownBtn = document.getElementById('btn-import-markdown');
+            const markdownFileInput = document.getElementById('markdown-file-input');
+            const fileInput = document.getElementById('avatar-file-input');
+            const uploadZone = document.getElementById('upload-zone');
+            const avatarPreview = document.getElementById('avatar-preview-mini');
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+
+            let iframeDoc = null;
+            let editableElements = [];
+            let isEditMode = true;
+            let currentFilename = 'index.html';
+
+            // Wait for iframe to load page content
+            iframe.addEventListener('load', () => {
+                try {
+                    iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (!iframeDoc) throw new Error("CORS or frame access restricted");
+
+                    // Parse path to check if index or blog
+                    const path = iframe.contentWindow.location.pathname;
+                    const filename = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+                    currentFilename = filename;
+
+                    const isIndex = iframeDoc.querySelector('#hero') !== null;
+                    const isBlog = iframeDoc.querySelector('.blog-post-wrapper') !== null;
+
+                    if (!isIndex && !isBlog) {
+                        showToast("Make sure index.html or a valid blog page is loaded.");
+                        return;
+                    }
+
+                    // Dynamically update save button text
+                    exportDownloadBtn.innerHTML = `Download ${filename} 📥`;
+
+                    initBuilder(isIndex, filename);
+                } catch (err) {
+                    console.error("Frame access failed:", err);
+                    showCorsWarning();
+                }
+            });
+
+            function showToast(message) {
+                toastMsg.innerText = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            }
+
+            function showCorsWarning() {
+                const workspace = document.getElementById('canvas-workspace');
+                workspace.innerHTML = `
+                    <div style="padding: 3rem; text-align: center; color: var(--text-editor); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <h2 style="color: var(--accent-lime); margin-bottom: 1rem; font-size: 1.5rem;">CORS Security Restriction</h2>
+                        <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 2rem; font-size: 0.9rem; line-height: 1.6;">
+                            It looks like your browser blocks visual editing because the file is opened directly via the <strong>file://</strong> protocol. 
+                        </p>
+                        <p style="color: var(--text-editor); max-width: 500px; margin: 0 auto 2rem; font-size: 0.9rem; line-height: 1.6;">
+                            To run the editor, you must open it via your local HTTP server link:
+                        </p>
+                        <a href="http://localhost:8000/admin.html" target="_blank" style="background: var(--accent-lime); color: #000; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 2rem;">
+                            Open http://localhost:8000/admin.html ↗
+                        </a>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">
+                            Ensure you started the server with: <code>python3 -m http.server 8000</code> in your folder.
+                        </p>
+                    </div>
+                `;
+            }
+
+            function initBuilder(isIndex, filename) {
+                // Clear active editable elements list
+                editableElements = [];
+
+                if (isIndex) {
+                    // Sync avatar image preview from index.html to sidebar uploader preview
+                    const avatarImg = iframeDoc.querySelector('.avatar-image-fallback.active img');
+                    if (avatarImg && avatarImg.src) {
+                        avatarPreview.src = avatarImg.src;
+                        avatarPreview.style.display = 'block';
+                    }
+
+                    // Enable reorder sidebar section
+                    sectionList.style.pointerEvents = 'auto';
+                    sectionList.style.opacity = '1';
+
+                    // Sync sections list
+                    syncSectionsList();
+                } else {
+                    // Disable index-only section order list since we are on a blog page
+                    sectionList.style.pointerEvents = 'none';
+                    sectionList.style.opacity = '0.5';
+                }
+
+                // Inject helper styles into the iframe head
+                const style = iframeDoc.createElement('style');
+                style.id = 'editor-helper-styles';
+                style.innerHTML = `
+                    body.editable-active [contenteditable="true"] {
+                        outline: 1px dashed rgba(163, 230, 53, 0.4) !important;
+                        outline-offset: 3px !important;
+                        cursor: text !important;
+                    }
+                    body.editable-active [contenteditable="true"]:hover {
+                        outline: 1px dashed #a3e635 !important;
+                        background-color: rgba(163, 230, 53, 0.05) !important;
+                    }
+                    body.editable-active [contenteditable="true"]:focus {
+                        outline: 2px solid #a3e635 !important;
+                        background-color: rgba(163, 230, 53, 0.08) !important;
+                    }
+                `;
+                iframeDoc.head.appendChild(style);
+                iframeDoc.body.classList.add('editable-active');
+
+                // Attach contenteditable attributes to matching text elements
+                let selectors = [];
+                if (isIndex) {
+                    selectors = [
+                        'h1', 'h2', 'h3', 'p', 'span.role-tag', 'span.tag-pill',
+                        'span.stat-num', 'span.stat-label', 'a.nav-item',
+                        'a.btn-talk', 'a.btn-primary', 'a.btn-secondary',
+                        'p.quote-text', 'span.quote-author', 'strong',
+                        'span.blog-meta-tag', 'span.blog-date', 'span.project-tag',
+                        'span.roster-title', 'span.roster-era-tag', 'span.roster-num',
+                        'span.timeline-tag', 'h2.console-heading', 'p.console-bio',
+                        'div.metric-col h4', 'div.metric-col p', 'span.status-text',
+                        'span.roster-tag-main', 'span.console-tag-main', 'span.art-tag',
+                        'span.art-footer-tag'
+                    ];
+                } else {
+                    // Blog page selectors
+                    selectors = [
+                        'h1.post-title', 'span.post-tag', 'span.post-date',
+                        'a.nav-item', 'a.btn-talk', 'a.btn-back',
+                        '.post-content'
+                    ];
+                }
+
+                selectors.forEach(selector => {
+                    const elements = iframeDoc.querySelectorAll(selector);
+                    elements.forEach(el => {
+                        if (el.tagName === 'A' && el.querySelector('svg')) return;
+                        el.setAttribute('contenteditable', 'true');
+                        editableElements.push(el);
+                    });
+                });
+
+                setupDragAndDrop();
+                setupToggles();
+                setupProjectImageUploads();
+
+                // Attach shortcut Cmd+S inside iframe Doc
+                iframeDoc.addEventListener('keydown', (e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                        e.preventDefault();
+                        downloadFallback(filename);
+                    }
+                });
+            }
+
+            function syncSectionsList() {
+                const main = iframeDoc.querySelector('main');
+                if (!main) return;
+                const sections = [...main.querySelectorAll('section')];
+                if (sections.length === 0) return;
+
+                // Clear static HTML list
+                sectionList.innerHTML = '';
+
+                sections.forEach(sec => {
+                    const id = sec.getAttribute('id');
+                    if (!id) return;
+                    const name = getSectionName(id);
+                    const isVisible = sec.style.display !== 'none';
+
+                    const li = document.createElement('li');
+                    li.className = 'section-item';
+                    li.draggable = true;
+                    li.setAttribute('data-section-id', id);
+                    li.innerHTML = `
+                        <span class="drag-handle">☰</span>
+                        <span>${name}</span>
+                        <div class="section-meta">
+                            <input type="checkbox" ${isVisible ? 'checked' : ''} data-section-toggle="${id}">
+                        </div>
+                    `;
+                    sectionList.appendChild(li);
+                });
+            }
+
+            function getSectionName(id) {
+                switch (id) {
+                    case 'hero': return 'Hero Section';
+                    case 'expertise': return 'Expertise Grid';
+                    case 'blogs': return 'Blogs & Insights';
+                    case 'about': return 'About Me & Stats';
+                    case 'contact': return 'Contact Box';
+                    default: return id.charAt(0).toUpperCase() + id.slice(1);
+                }
+            }
+
+            // Drag and drop section reordering
+            function setupDragAndDrop() {
+                let dragItem = null;
+
+                sectionList.addEventListener('dragstart', (e) => {
+                    dragItem = e.target.closest('.section-item');
+                    dragItem.classList.add('dragging');
+                });
+
+                sectionList.addEventListener('dragend', () => {
+                    dragItem.classList.remove('dragging');
+                    reorderCanvasSections();
+                });
+
+                sectionList.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const afterElement = getDragAfterElement(sectionList, e.clientY);
+                    const currentDrag = document.querySelector('.dragging');
+                    if (afterElement == null) {
+                        sectionList.appendChild(currentDrag);
+                    } else {
+                        sectionList.insertBefore(currentDrag, afterElement);
+                    }
+                });
+            }
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.section-item:not(.dragging)')];
+
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+
+            function reorderCanvasSections() {
+                if (!iframeDoc) return;
+                const order = [...document.querySelectorAll('.section-item')].map(item => item.getAttribute('data-section-id'));
+                const main = iframeDoc.querySelector('main');
+                if (!main) return;
+
+                // Reorder DOM nodes inside the iframe
+                order.forEach(sectionId => {
+                    const sectionNode = iframeDoc.querySelector(`#${sectionId}`);
+                    if (sectionNode) {
+                        main.appendChild(sectionNode);
+                    }
+                });
+            }
+
+            function setupToggles() {
+                const toggles = document.querySelectorAll('input[data-section-toggle]');
+                toggles.forEach(toggle => {
+                    toggle.addEventListener('change', () => {
+                        if (!iframeDoc) return;
+                        const sectionId = toggle.getAttribute('data-section-toggle');
+                        const targetSection = iframeDoc.querySelector(`#${sectionId}`);
+                        if (targetSection) {
+                            targetSection.style.display = toggle.checked ? '' : 'none';
+                        }
+                    });
+                });
+            }
+
+            function setupProjectImageUploads() {
+                if (!iframeDoc) return;
+                const previews = iframeDoc.querySelectorAll('.project-preview, .avatar-image-fallback, .post-banner');
+                previews.forEach((preview, index) => {
+                    preview.style.cursor = 'pointer';
+                    preview.setAttribute('title', preview.classList.contains('avatar-image-fallback') ? 'Click to upload custom profile photo' : (preview.classList.contains('post-banner') ? 'Click to upload custom banner photo' : 'Click to upload custom header photo'));
+
+                    preview.addEventListener('mouseenter', () => {
+                        if (isEditMode) {
+                            preview.style.outline = '2px dashed var(--accent-lime)';
+                            preview.style.outlineOffset = '-4px';
+                        }
+                    });
+                    preview.addEventListener('mouseleave', () => {
+                        preview.style.outline = '';
+                    });
+
+                    preview.addEventListener('click', (e) => {
+                        if (!isEditMode) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const pInput = document.createElement('input');
+                        pInput.type = 'file';
+                        pInput.accept = 'image/*';
+
+                        pInput.addEventListener('change', (event) => {
+                            const file = event.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (uploadEvent) => {
+                                    const base64Data = uploadEvent.target.result;
+
+                                    if (preview.classList.contains('avatar-image-fallback')) {
+                                        preview.innerHTML = `<img src="${base64Data}" style="width: 100%; height: 100%; object-fit: contain;" alt="Profile">`;
+                                        showToast("Era profile photo updated!");
+                                        avatarPreview.src = base64Data;
+                                        avatarPreview.style.display = 'block';
+                                    } else {
+                                        const cloudTag = preview.querySelector('.preview-cloud-tag');
+                                        const tagHtml = cloudTag ? cloudTag.outerHTML : '';
+                                        preview.innerHTML = `<img src="${base64Data}" alt="Header Image">${tagHtml}`;
+                                        preview.classList.add('has-img');
+
+                                        const isBlog = preview.classList.contains('blog-preview') || preview.classList.contains('post-banner');
+                                        showToast(`${isBlog ? 'Blog' : 'Project'} header image updated!`);
+                                    }
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        });
+
+                        pInput.click();
+                    });
+                });
+            }
+
+                    // Image uploading
+                    uploadZone.addEventListener('click', () => {
+                        fileInput.click();
+                    });
+
+                    fileInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (file && iframeDoc) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                const base64Data = event.target.result;
+                                avatarPreview.src = base64Data;
+                                avatarPreview.style.display = 'block';
+
+                                const avatarContainer = iframeDoc.querySelector('.avatar-image-fallback.active');
+                                if (avatarContainer) {
+                                    avatarContainer.innerHTML = `<img src="${base64Data}" style="width: 100%; height: 100%; object-fit: contain;" alt="Profile">`;
+                                }
+                                showToast("Era profile photo updated!");
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    // Toggle guide outlines
+                    previewToggleBtn.addEventListener('click', () => {
+                        if (!iframeDoc) return;
+                        isEditMode = !isEditMode;
+                        if (isEditMode) {
+                            previewToggleBtn.textContent = 'Toggle Guides Mode';
+                            iframeDoc.body.classList.add('editable-active');
+                            editableElements.forEach(el => el.setAttribute('contenteditable', 'true'));
+                        } else {
+                            previewToggleBtn.textContent = 'Enable Guides Mode';
+                            iframeDoc.body.classList.remove('editable-active');
+                            editableElements.forEach(el => el.removeAttribute('contenteditable'));
+                        }
+                    });
+
+                    // Clean DOM compiler for Exporting and Saving
+                    function getCleanHtml() {
+                        if (!iframeDoc) return '';
+                        const docClone = iframeDoc.documentElement.cloneNode(true);
+
+                        // Remove editor helper styles
+                        const helperStyle = docClone.querySelector('#editor-helper-styles');
+                        if (helperStyle) helperStyle.remove();
+
+                        const bodyNode = docClone.querySelector('body');
+                        if (bodyNode) {
+                            bodyNode.classList.remove('editable-active');
+                        }
+
+                        // Remove editable markers
+                        const editables = docClone.querySelectorAll('[contenteditable]');
+                        editables.forEach(el => el.removeAttribute('contenteditable'));
+
+                        // Clean inline styles containing outline markers (browser artifacts)
+                        const inlineStyled = docClone.querySelectorAll('[style]');
+                        inlineStyled.forEach(el => {
+                            // Check if style attribute matches outline patterns
+                            if (el.getAttribute('style').includes('outline')) {
+                                el.style.outline = '';
+                            }
+                            if (el.getAttribute('style') === '' || !el.getAttribute('style').trim()) {
+                                el.removeAttribute('style');
+                            }
+                        });
+
+                        // Flatten nested duplicate headers if browser editing nested them
+                        const headers = docClone.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                        headers.forEach(h => {
+                            const nested = h.querySelector(h.tagName);
+                            if (nested) {
+                                h.innerHTML = nested.innerHTML;
+                            }
+                        });
+
+                        // Remove temp editor attributes on project previews, banners, and avatars
+                        const clonePreviews = docClone.querySelectorAll('.project-preview, .post-banner, .avatar-image-fallback');
+                        clonePreviews.forEach(p => {
+                            p.removeAttribute('title');
+                            p.style.cursor = '';
+                            p.style.outline = '';
+                            if (p.getAttribute('style') === '') p.removeAttribute('style');
+                        });
+
+                        // Strip sections toggled off completely
+                        const hiddenToggles = [...document.querySelectorAll('input[data-section-toggle]')].filter(t => !t.checked);
+                        hiddenToggles.forEach(toggle => {
+                            const sectionId = toggle.getAttribute('data-section-toggle');
+                            const cloneSec = docClone.querySelector(`#${sectionId}`);
+                            if (cloneSec) cloneSec.remove();
+                        });
+
+                        return "<!DOCTYPE html>\n" + docClone.outerHTML;
+                    }
+
+                    // Fallback download trigger
+                    function downloadFallback(filename) {
+                        if (typeof filename !== 'string' || !filename) {
+                            const path = iframe.contentWindow.location.pathname;
+                            filename = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+                        }
+                        const exportedHtml = getCleanHtml();
+                        const blob = new Blob([exportedHtml], { type: 'text/html' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        link.click();
+                    }
+
+                    // Bind click triggers
+                    exportDownloadBtn.addEventListener('click', () => {
+                        const path = iframe.contentWindow.location.pathname;
+                        const filename = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+                        downloadFallback(filename);
+                    });
+
+                    if (createBlogBtn) {
+                        createBlogBtn.addEventListener('click', () => {
+                            if (!iframeDoc) return;
+                            const blogsList = iframeDoc.querySelector('.blogs-list');
+                            if (!blogsList) {
+                                showToast("Could not find blogs list section.");
+                                return;
+                            }
+
+                            // Create unique ID / filename suggestions
+                            const newId = Date.now();
+                            const newFilename = `blog-new-${newId}.html`;
+
+                            // Create the blog card element
+                            const blogCard = iframeDoc.createElement('div');
+                            blogCard.className = 'blog-card';
+                            blogCard.innerHTML = `
+                        <div class="project-preview blog-preview" style="cursor: pointer;" title="Click to upload custom header photo">
+                            <!-- Default Simulated Header SVG -->
+                            <svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="400" height="220" rx="12" fill="#131317"></rect>
+                                <path d="M 0,20 L 400,20 M 0,40 L 400,40 M 0,60 L 400,60 M 0,80 L 400,80 M 0,100 L 400,100 M 0,120 L 400,120 M 0,140 L 400,140 M 0,160 L 400,160 M 0,180 L 400,180 M 0,200 L 400,200" stroke="#1f1f29" stroke-width="1"></path>
+                                <path d="M 40,0 L 40,220 M 80,0 L 80,220 M 120,0 L 120,220 M 160,0 L 160,220 M 200,0 L 200,220 M 240,0 L 240,220 M 280,0 L 280,220 M 320,0 L 320,220 M 360,0 L 360,220" stroke="#1f1f29" stroke-width="1"></path>
+                                <circle cx="200" cy="110" r="50" fill="none" stroke="#a3e635" stroke-width="2" stroke-opacity="0.3"></circle>
+                                <text x="200" y="115" fill="#e4e4e7" font-size="12" font-weight="700" text-anchor="middle" font-family="Plus Jakarta Sans">NEW POST</text>
+                            </svg>
+                        </div>
+                        <div class="blog-details">
+                            <span class="blog-meta-tag" contenteditable="true">CATEGORY</span>
+                            <span class="blog-date" contenteditable="true">${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                            <h3 contenteditable="true">New Blog Article Title</h3>
+                            <p contenteditable="true">Write a brief description of the new blog article here.</p>
+                            <a href="${newFilename}" class="btn-case-study">Read article <span class="arrow-right">↗</span></a>
+                        </div>
+                    `;
+
+                            // Append card to grid
+                            blogsList.appendChild(blogCard);
+
+                            // Make elements editable
+                            const details = blogCard.querySelector('.blog-details');
+                            details.querySelectorAll('span, h3, p').forEach(el => {
+                                el.setAttribute('contenteditable', 'true');
+                                editableElements.push(el);
+                            });
+
+                            // Attach image upload listener
+                            const preview = blogCard.querySelector('.project-preview');
+                            preview.addEventListener('click', (e) => {
+                                if (!isEditMode) return;
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                const pInput = document.createElement('input');
+                                pInput.type = 'file';
+                                pInput.accept = 'image/*';
+
+                                pInput.addEventListener('change', (event) => {
+                                    const file = event.target.files[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = (uploadEvent) => {
+                                            const base64Data = uploadEvent.target.result;
+                                            preview.innerHTML = `<img src="${base64Data}" alt="Blog Header">`;
+                                            preview.classList.add('has-img');
+                                            showToast("Blog header image updated!");
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                });
+
+                                pInput.click();
+                            });
+
+                            // Focus on the title
+                            const titleNode = details.querySelector('h3');
+                            if (titleNode) titleNode.focus();
+
+                            // Trigger template download for the subpage
+                            downloadBlogTemplate(newFilename);
+
+                            showToast("New blog card created! Template downloaded.");
+                        });
+                    }
+
+                    function downloadBlogTemplate(filename) {
+                        const templateHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CB. | New Blog Post</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="blog-single-page">
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">CB<span>.</span></a>
+            <nav class="nav-links">
+                <a href="index.html#about" class="nav-item">About</a>
+                <a href="index.html#expertise" class="nav-item">Expertise</a>
+                <a href="index.html#blogs" class="nav-item active">Blogs</a>
+                <a href="index.html#contact" class="nav-item">Contact</a>
+            </nav>
+            <a href="index.html#contact" class="btn-talk">Let's Talk</a>
+        </div>
+    </header>
+
+    <!-- Blog Content Container -->
+    <main class="blog-post-wrapper">
+        <div class="blog-post-container">
+            <a href="index.html#blogs" class="btn-back">← Back to Portfolio</a>
+            
+            <div class="post-header">
+                <span class="post-tag">Category</span>
+                <span class="post-date">${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                <h1 class="post-title">New Blog Article Title</h1>
+            </div>
+
+            <div class="post-banner">
+                <!-- Default Simulated Header SVG -->
+                <svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="400" height="220" rx="12" fill="#131317"></rect>
+                    <path d="M 0,20 L 400,20 M 0,40 L 400,40 M 0,60 L 400,60 M 0,80 L 400,80 M 0,100 L 400,100 M 0,120 L 400,120 M 0,140 L 400,140 M 0,160 L 400,160 M 0,180 L 400,180 M 0,200 L 400,200" stroke="#1f1f29" stroke-width="1"></path>
+                    <path d="M 40,0 L 40,220 M 80,0 L 80,220 M 120,0 L 120,220 M 160,0 L 160,220 M 200,0 L 200,220 M 240,0 L 240,220 M 280,0 L 280,220 M 320,0 L 320,220 M 360,0 L 360,220" stroke="#1f1f29" stroke-width="1"></path>
+                    <circle cx="200" cy="110" r="50" fill="none" stroke="#a3e635" stroke-width="2" stroke-opacity="0.3"></circle>
+                    <text x="200" y="115" fill="#e4e4e7" font-size="12" font-weight="700" text-anchor="middle" font-family="Plus Jakarta Sans">NEW POST</text>
+                </svg>
+            </div>
+
+            <article class="post-content">
+                <p>Start writing your blog content here...</p>
+                
+                <h2>Section Heading</h2>
+                <p>Detailed information goes here.</p>
+                
+                <pre><code>// code snippet example
+console.log("Hello, World!");</code></pre>
+            </article>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p class="copyright">© 2026 Carlo Bayani. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.html#about">About</a>
+                <a href="index.html#expertise">Expertise</a>
+                <a href="index.html#blogs">Blogs</a>
+                <a href="index.html#contact">Contact</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>`;
+
+                        const blob = new Blob([templateHtml], { type: 'text/html' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        link.click();
+                    }
+
+                    // Bind Markdown Import trigger
+                    if (importMarkdownBtn && markdownFileInput) {
+                        importMarkdownBtn.addEventListener('click', () => {
+                            if (!iframeDoc) return;
+                            const isBlog = iframeDoc.querySelector('.blog-post-wrapper') !== null;
+                            if (!isBlog) {
+                                showToast("Please open a blog sub-page to import Markdown!");
+                                return;
+                            }
+                            markdownFileInput.click();
+                        });
+
+                        markdownFileInput.addEventListener('change', (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                if (typeof marked === 'undefined') {
+                                    showToast("Error: Markdown parser library is not loaded.");
+                                    return;
+                                }
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                    const text = event.target.result;
+                                    
+                                    // Parse YAML front-matter or extract first header as title
+                                    let title = "";
+                                    let category = "";
+                                    let date = "";
+                                    let markdownBody = text;
+
+                                    if (text.trim().startsWith('---')) {
+                                        const parts = text.split('---');
+                                        if (parts.length >= 3) {
+                                            const frontMatter = parts[1];
+                                            markdownBody = parts.slice(2).join('---').trim();
+
+                                            // Parse YAML lines
+                                            const lines = frontMatter.split('\n');
+                                            lines.forEach(line => {
+                                                const colonIdx = line.indexOf(':');
+                                                if (colonIdx !== -1) {
+                                                    const key = line.substring(0, colonIdx).trim().toLowerCase();
+                                                    const value = line.substring(colonIdx + 1).replace(/['"]/g, "").trim();
+                                                    if (key === 'title') title = value;
+                                                    else if (key === 'category' || key === 'tags') category = value;
+                                                    else if (key === 'date') date = value;
+                                                }
+                                            });
+                                        }
+                                    } else {
+                                        // Fallback: Check if the first line is a title (# title)
+                                        const lines = text.split('\n');
+                                        if (lines[0].trim().startsWith('# ')) {
+                                            title = lines[0].trim().substring(2).trim();
+                                            markdownBody = lines.slice(1).join('\n').trim();
+                                        }
+                                    }
+
+                                    // Parse Markdown to HTML
+                                    const htmlContent = marked.parse(markdownBody);
+
+                                    // Inject into iframe Doc
+                                    if (title) {
+                                        const titleEl = iframeDoc.querySelector('h1.post-title');
+                                        if (titleEl) titleEl.innerText = title;
+                                    }
+                                    if (category) {
+                                        const catEl = iframeDoc.querySelector('.post-header span.post-tag');
+                                        if (catEl) catEl.innerText = category;
+                                    }
+                                    if (date) {
+                                        const dateEl = iframeDoc.querySelector('.post-header span.post-date');
+                                        if (dateEl) dateEl.innerText = date;
+                                    }
+                                    
+                                    const contentEl = iframeDoc.querySelector('.post-content');
+                                    if (contentEl) {
+                                        contentEl.innerHTML = htmlContent;
+                                        showToast("Markdown content successfully imported!");
+                                    } else {
+                                        showToast("Error: Could not find .post-content container.");
+                                    }
+                                    
+                                    // Reset file input value to allow uploading the same file again
+                                    markdownFileInput.value = "";
+                                };
+                                reader.readAsText(file);
+                            }
+                        });
+                    }
+
+                    // Bind Cmd+S/Ctrl+S on parent window
+                    window.addEventListener('keydown', (e) => {
+                        if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+                            e.preventDefault();
+                            const path = iframe.contentWindow.location.pathname;
+                            const filename = path.substring(path.lastIndexOf('/') + 1) || 'index.html';
+                            downloadFallback(filename);
+                        }
+                    });
+                });
+    </script>
+</body>
+
+</html>

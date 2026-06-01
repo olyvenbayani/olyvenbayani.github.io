@@ -1,0 +1,28 @@
+{
+  "blogs": [
+    {
+      "id": 1,
+      "title": "Reflections on Running a Multi-Day SRE Bootcamp",
+      "excerpt": "Key takeaways from training 50+ enterprise engineers on chaotic engineering practices, incident responses, and automated failover runbooks.",
+      "date": "April 30, 2026",
+      "notionLink": "https://notion.so/YOUR-NOTION-LINK-HERE-1",
+      "slug": "blog-sre"
+    },
+    {
+      "id": 2,
+      "title": "Mastering Kubernetes: Production-Grade Deployments",
+      "excerpt": "Deep dive into Kubernetes architecture, deployment strategies, and best practices for scaling containerized applications.",
+      "date": "April 15, 2026",
+      "notionLink": "https://notion.so/YOUR-NOTION-LINK-HERE-2",
+      "slug": "blog-kubernetes"
+    },
+    {
+      "id": 3,
+      "title": "Prometheus Monitoring: Building Observable Systems",
+      "excerpt": "Complete guide to setting up Prometheus, creating custom metrics, and building effective monitoring strategies.",
+      "date": "April 1, 2026",
+      "notionLink": "https://notion.so/YOUR-NOTION-LINK-HERE-3",
+      "slug": "blog-prometheus"
+    }
+  ]
+}

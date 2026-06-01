@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CB. | SRE Bootcamp Reflections</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="blog-single-page">
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">CB<span>.</span></a>
+            <nav class="nav-links">
+                <a href="index.html#about" class="nav-item">About</a>
+                <a href="index.html#expertise" class="nav-item">Expertise</a>
+                <a href="index.html#blogs" class="nav-item active">Blogs</a>
+                <a href="index.html#contact" class="nav-item">Contact</a>
+            </nav>
+            <a href="index.html#contact" class="btn-talk">Let's Talk</a>
+        </div>
+    </header>
+
+    <!-- Blog Content Container -->
+    <main class="blog-post-wrapper">
+        <div class="blog-post-container">
+            <a href="index.html#blogs" class="btn-back">← Back to Portfolio</a>
+            
+            <div class="post-header">
+                <span class="post-tag">DevOps Education</span>
+                <span class="post-date">April 30, 2026</span>
+                <h1 class="post-title">Reflections on Running a Multi-Day SRE Bootcamp</h1>
+            </div>
+
+            <div class="post-banner">
+                <!-- Default Simulated Header SVG -->
+                <svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="400" height="220" rx="12" fill="#131317"></rect>
+                    <path d="M 0,20 L 400,20 M 0,40 L 400,40 M 0,60 L 400,60 M 0,80 L 400,80 M 0,100 L 400,100 M 0,120 L 400,120 M 0,140 L 400,140 M 0,160 L 400,160 M 0,180 L 400,180 M 0,200 L 400,200" stroke="#1f1f29" stroke-width="1"></path>
+                    <path d="M 40,0 L 40,220 M 80,0 L 80,220 M 120,0 L 120,220 M 160,0 L 160,220 M 200,0 L 200,220 M 240,0 L 240,220 M 280,0 L 280,220 M 320,0 L 320,220 M 360,0 L 360,220" stroke="#1f1f29" stroke-width="1"></path>
+                    <circle cx="200" cy="110" r="50" fill="none" stroke="#00c853" stroke-width="2" stroke-opacity="0.3"></circle>
+                    <polygon points="200,85 225,125 175,125" stroke="#a3e635" stroke-width="1.5" stroke-opacity="0.5" fill="none"></polygon>
+                    <text x="200" y="115" fill="#e4e4e7" font-size="12" font-weight="700" text-anchor="middle" font-family="Plus Jakarta Sans">DEVOPS BOOTCAMP</text>
+                </svg>
+            </div>
+
+            <article class="post-content">
+                <p>Knowledge sharing is one of the most effective ways to scale system reliability across an engineering organization. Recently, I had the privilege of architecting and delivering a multi-day immersive SRE &amp; Chaos Engineering bootcamp for 50+ enterprise developers and systems administrators. Here are the core takeaways from that high-energy experience.</p>
+
+                <h2>1. Shifting Mindsets: From Reactive to Proactive</h2>
+                <p>Many traditional developers view system errors as something QA or operations will discover in production. The first goal of our bootcamp was to rewrite this mental model. We introduced developers to the concept of **proactive fault injection**.</p>
+                <p>Instead of discussing error boundaries on whiteboards, we set up hands-on sandbox labs where engineers were required to design their code to withstand sudden downstream API outages, high packet latency, and CPU throttle events.</p>
+
+                <h2>2. Chaos in the Sandbox: Breaking Things Intentionally</h2>
+                <p>We used chaos engineering tools to introduce runtime failure scenarios in a secure environment. Teams were divided into squads and assigned a microservice application. On day two, we initiated controlled chaos experiments:</p>
+                <ul>
+                    <li><strong>Pod Deletions:</strong> Terminated core API pods at random intervals to test Kubernetes replica state recovery.</li>
+                    <li><strong>Network Latency Injection:</strong> Injected a 2000ms delay on authentication endpoints using service mesh traffic rules.</li>
+                    <li><strong>Database Outage:</strong> Severed connections to DB replicas during high write operations.</li>
+                </ul>
+                <p>Teams were evaluated not on whether their services failed, but on how quickly their monitoring systems alerted them and how seamlessly their automated failovers took over.</p>
+
+                <h2>3. Establishing Clean Alerts and Incident Channels</h2>
+                <p>A key friction point in enterprise organizations is alert fatigue—where pages fire constantly for minor, non-actionable events. We trained the engineering cohorts to align their alert frameworks to strict **Service Level Indicators (SLIs)** and **Service Level Objectives (SLOs)**.</p>
+                <p>We designed dashboard templates that highlighted only user-facing metrics (like HTTP 5xx rates and request latency percentiles) rather than simple node-level metrics (like high CPU usage, which often does not impact user experience directly).</p>
+
+                <h2>4. The Power of Blameless Postmortems</h2>
+                <p>On the final day, we simulated a massive multi-service production outage. After resolving the simulated incident, we gathered to run a **Blameless Postmortem** session. The focus was shifted entirely away from *who* made the mistake, and placed on *why* the system design allowed the mistake to cause an outage.</p>
+                <p>This cultural shift was cited by 90% of the participants as the most valuable takeaway from the program, encouraging teams to document incidents openly and implement automated guardrails rather than pointing fingers.</p>
+
+                <h2>Conclusion</h2>
+                <p>UPSKILLING is not just about teaching commands or dashboard setups; it is about building a culture of reliability. By putting developers in the driver's seat of chaotic outages and teaching them to appreciate the balance between scale, security, and cost, we enable them to build system designs that run reliably under pressure.</p>
+            </article>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p class="copyright">© 2026 Carlo Bayani. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.html#about">About</a>
+                <a href="index.html#expertise">Expertise</a>
+                <a href="index.html#blogs">Blogs</a>
+                <a href="index.html#contact">Contact</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
