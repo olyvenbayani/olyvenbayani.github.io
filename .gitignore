@@ -1,1 +1,24 @@
+# Admin panel (keep private)
 admin.html
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node/npm (if using server in future)
+node_modules/
+package-lock.json
+npm-debug.log
+
+# Local development
+.env
+.env.local
