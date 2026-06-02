@@ -130,16 +130,22 @@ document.addEventListener('DOMContentLoaded', () => {
             data.blogs.forEach((blog, index) => {
                 const blogCard = document.createElement('div');
                 blogCard.className = 'blog-card';
+
+                // Use blog image if available, otherwise use placeholder SVG
+                const previewContent = blog.blogImage
+                    ? `<img src="${blog.blogImage}" alt="${blog.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`
+                    : `<svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="400" height="220" rx="12" fill="#131317"></rect>
+                        <path d="M 0,20 L 400,20 M 0,40 L 400,40 M 0,60 L 400,60 M 0,80 L 400,80 M 0,100 L 400,100 M 0,120 L 400,120 M 0,140 L 400,140 M 0,160 L 400,160 M 0,180 L 400,180 M 0,200 L 400,200" stroke="#1f1f29" stroke-width="1"></path>
+                        <path d="M 40,0 L 40,220 M 80,0 L 80,220 M 120,0 L 120,220 M 160,0 L 160,220 M 200,0 L 200,220 M 240,0 L 240,220 M 280,0 L 280,220 M 320,0 L 320,220 M 360,0 L 360,220" stroke="#1f1f29" stroke-width="1"></path>
+                        <circle cx="200" cy="110" r="50" fill="none" stroke="#7c3aed" stroke-width="2" stroke-opacity="0.3"></circle>
+                        <circle cx="200" cy="110" r="30" fill="none" stroke="#a3e635" stroke-width="1.5" stroke-opacity="0.5"></circle>
+                        <text x="200" y="115" fill="#e4e4e7" font-size="12" font-weight="700" text-anchor="middle" font-family="Plus Jakarta Sans">${blog.title.substring(0, 15).toUpperCase()}...</text>
+                    </svg>`;
+
                 blogCard.innerHTML = `
                     <div class="project-preview blog-preview" style="outline-offset: -4px;">
-                        <svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="400" height="220" rx="12" fill="#131317"></rect>
-                            <path d="M 0,20 L 400,20 M 0,40 L 400,40 M 0,60 L 400,60 M 0,80 L 400,80 M 0,100 L 400,100 M 0,120 L 400,120 M 0,140 L 400,140 M 0,160 L 400,160 M 0,180 L 400,180 M 0,200 L 400,200" stroke="#1f1f29" stroke-width="1"></path>
-                            <path d="M 40,0 L 40,220 M 80,0 L 80,220 M 120,0 L 120,220 M 160,0 L 160,220 M 200,0 L 200,220 M 240,0 L 240,220 M 280,0 L 280,220 M 320,0 L 320,220 M 360,0 L 360,220" stroke="#1f1f29" stroke-width="1"></path>
-                            <circle cx="200" cy="110" r="50" fill="none" stroke="#7c3aed" stroke-width="2" stroke-opacity="0.3"></circle>
-                            <circle cx="200" cy="110" r="30" fill="none" stroke="#a3e635" stroke-width="1.5" stroke-opacity="0.5"></circle>
-                            <text x="200" y="115" fill="#e4e4e7" font-size="12" font-weight="700" text-anchor="middle" font-family="Plus Jakarta Sans">${blog.title.substring(0, 15).toUpperCase()}...</text>
-                        </svg>
+                        ${previewContent}
                     </div>
                     <div class="blog-details">
                         <span class="blog-meta-tag">${blog.title.split(':')[0].toUpperCase()}</span>

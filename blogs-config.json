@@ -10,19 +10,21 @@
     },
     {
       "id": 2,
-      "title": "Mastering Kubernetes: Production-Grade Deployments",
-      "excerpt": "Deep dive into Kubernetes architecture, deployment strategies, and best practices for scaling containerized applications.",
-      "date": "April 15, 2026",
-      "notionLink": "https://notion.so/YOUR-NOTION-LINK-HERE-2",
-      "slug": "blog-kubernetes"
+      "title": "AWS Health to Jira Automation Workflow",
+      "excerpt": "By automatically monitoring emails from health@aws.com, the system uses an AI model (LiteLLM with Anthropic Claude) to filter out routine background noise and identify truly actionable events.",
+      "date": "January 2026",
+      "notionLink": "https://github.com/olyvenbayani/N8N_AWS_Health_to_Jira_ticket",
+      "blogImage": "assets/blog/health2jira.png",
+      "slug": "blog-automation"
     },
     {
       "id": 3,
-      "title": "Prometheus Monitoring: Building Observable Systems",
-      "excerpt": "Complete guide to setting up Prometheus, creating custom metrics, and building effective monitoring strategies.",
-      "date": "April 1, 2026",
-      "notionLink": "https://notion.so/YOUR-NOTION-LINK-HERE-3",
-      "slug": "blog-prometheus"
+      "title": "How Auto Scaling Rescued a Philippine Government Agency's Over-Budget DTR App",
+      "excerpt": "Discover how migrating a legacy government attendance system to AWS elasticity chopped idle-capacity costs while surviving massive twice-a-day traffic spikes.",
+      "date": "March 3, 2026",
+      "notionLink": "https://app.notion.com/p/Modernizing-Public-Sector-Infrastructure-How-Auto-Scaling-Saved-Massive-Infrastructure-Costs-for-a--3731ea8069cf80ce89b2f729f131f332?source=copy_link",
+      "blogImage": "assets/blog/about_architecture.png",
+      "slug": "blog-architecture"
     }
   ]
 }
