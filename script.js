@@ -167,6 +167,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // ==========================================================================
+    // Dynamic Projects Loading from JSON
+    // ==========================================================================
+    const projectIcons = {
+        cyan: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>`,
+        lime: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`
+    };
+
+    fetch('projects-config.json')
+        .then(response => response.json())
+        .then(data => {
+            const projectsContainer = document.getElementById('projects-container');
+            if (!projectsContainer) return;
+
+            projectsContainer.innerHTML = '';
+
+            data.projects.forEach(project => {
+                const card = document.createElement('div');
+                card.className = `project-card-item accent-${project.accent}`;
+
+                const techTagsHTML = project.tech
+                    .map(t => `<span class="project-tech-tag">${t}</span>`)
+                    .join('');
+
+                card.innerHTML = `
+                    <div class="project-card-header">
+                        <div class="project-card-icon ${project.accent}">
+                            ${projectIcons[project.accent] || projectIcons.cyan}
+                        </div>
+                        <span class="project-status-badge">${project.status}</span>
+                    </div>
+                    <div>
+                        <p class="project-card-tagline ${project.accent}">${project.tagline}</p>
+                        <h3 class="project-card-name">${project.name}</h3>
+                    </div>
+                    <p class="project-card-desc">${project.description}</p>
+                    <div class="project-tech-tags">${techTagsHTML}</div>
+                    <div class="project-card-footer">
+                        <a href="${project.url}" target="_blank" rel="noopener noreferrer" class="project-link-btn ${project.accent}">
+                            View App <span class="link-arrow">↗</span>
+                        </a>
+                    </div>
+                `;
+                projectsContainer.appendChild(card);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading projects:', error);
+        });
+
+    // ==========================================================================
     // Scroll Spy (Active navigation highlight)
     // ==========================================================================
     const sections = document.querySelectorAll('section');

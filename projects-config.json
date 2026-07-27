@@ -1,0 +1,24 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "name": "Ano G?",
+      "tagline": "Plan trips together",
+      "description": "Build a day-by-day itinerary with your group and split shared expenses — so everyone knows the plan and who owes what.",
+      "url": "https://ano-g.vercel.app/",
+      "status": "Live",
+      "tech": ["Next.js", "TypeScript", "Vercel"],
+      "accent": "cyan"
+    },
+    {
+      "id": 2,
+      "name": "Knowhere",
+      "tagline": "Learn AWS by designing architectures",
+      "description": "Master EC2, VPC, Lambda, and more through hands-on architecture design challenges. An interactive AWS learning platform for cloud engineers.",
+      "url": "https://coblearninghub.vercel.app/",
+      "status": "Live",
+      "tech": ["React", "Vite", "Supabase", "AWS"],
+      "accent": "lime"
+    }
+  ]
+}
